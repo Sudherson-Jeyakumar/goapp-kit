@@ -2,32 +2,25 @@ package log
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
-
-	"io/ioutil"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func Test_BaseLogger(t *testing.T) {
 	Convey("Intialize an empty Writer in logger", t, func() {
-		_, err := InitBaseLogger(nil, "hello")
+		l := initBaseLogger(nil, "hello")
 
-		So(err, ShouldNotBeNil)
-	})
-
-	Convey("Intialize a non empty Writer in logger", t, func() {
-		_, err := InitBaseLogger(os.Stdout, "hello")
-
-		So(err, ShouldBeNil)
+		So(l, ShouldNotBeNil)
 	})
 
 	var w bytes.Buffer
 	Convey("With Buffer as writer", t, func() {
-		s, err := InitBaseLogger(&w, "hello")
-		So(err, ShouldBeNil)
+		s := initBaseLogger(&w, "hello")
+		So(s, ShouldNotBeNil)
 
 		Convey("Writer an info", func() {
 			s.Infof("%s", "Writing first String")
@@ -40,8 +33,8 @@ func Test_BaseLogger(t *testing.T) {
 func TestBaseLogger_ChangePrefix(t *testing.T) {
 	var w bytes.Buffer
 	Convey("Given, With Buffer as writer", t, func() {
-		s, err := InitBaseLogger(&w, "hello")
-		So(err, ShouldBeNil)
+		s := initBaseLogger(&w, "hello")
+		So(s, ShouldNotBeNil)
 
 		s.Infof("%s", "Writing first String")
 		So(strings.TrimRight(w.String(), "\n"), ShouldEndWith, "INFO <hello> : Writing first String")
@@ -68,8 +61,8 @@ func TestBaseLogger_ChangePrefix(t *testing.T) {
 func TestBaseLogger_Enabler(t *testing.T) {
 	var w bytes.Buffer
 	Convey("Given, With Buffer as writer", t, func() {
-		s, err := InitBaseLogger(&w, "hello")
-		So(err, ShouldBeNil)
+		s := initBaseLogger(&w, "hello")
+		So(s, ShouldNotBeNil)
 
 		s.Enabler(false)
 
@@ -80,15 +73,17 @@ func TestBaseLogger_Enabler(t *testing.T) {
 
 func TestFileLogger_ChangePrefix(t *testing.T) {
 
-	f, err := os.OpenFile("./test/log.txt", os.O_RDWR|os.O_CREATE, 0777)
-	if err != nil {
-		return
-	}
-	defer os.Remove("./test/log.txt")
+	os.Remove("./test/log.txt")
 
 	Convey("Given, With File as writer", t, func() {
+		Convey("Wrong FileName is specified", func() {
+			_, err := initLoggerWithFile("/invaliddir/test/log.txt")
+			So(err, ShouldNotBeNil)
+		})
+
 		Convey("Given that a file is prepared", func() {
-			s, err := InitFileLogger(f, "hello")
+			s, err := initLoggerWithFile("./test/log.txt")
+			So(s, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
 			s.Infof("%s", "Writing first String")
@@ -105,7 +100,7 @@ func TestFileLogger_ChangePrefix(t *testing.T) {
 		})
 
 		Convey("When an empty writer is given as input", func() {
-			_, err := InitFileLogger(nil, "hello")
+			_, err := initLoggerWithFile(" ")
 			So(err, ShouldNotBeNil)
 		})
 	})

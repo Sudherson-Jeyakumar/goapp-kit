@@ -5,6 +5,10 @@ type Config interface {
 	Value(...string) interface{}
 }
 
+type Reader interface {
+	Read(Config) interface{}
+}
+
 type simpleConfig map[interface{}]interface{}
 
 func Simple() simpleConfig {

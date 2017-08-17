@@ -2,16 +2,14 @@ package log
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type Logger interface {
 	Infof(string, ...interface{})
 	Errorf(string, ...interface{})
-	Tracef(string, ...interface{})
 }
 
 type Prefixer interface {
@@ -27,6 +25,10 @@ type Closer interface {
 	Close() error
 }
 
+type LoggerReader struct {
+	Logger
+}
+
 type baseLogger struct {
 	logger *log.Logger
 	w      io.Writer
@@ -35,9 +37,11 @@ type baseLogger struct {
 	prefixes map[string]string
 }
 
-func InitBaseLogger(w io.Writer, prefix string) (*baseLogger, error) {
+var baseLoggerObj = initBaseLogger(ioutil.Discard, "logger")
+
+func initBaseLogger(w io.Writer, prefix string) *baseLogger {
 	if w == nil {
-		return &baseLogger{}, errors.Errorf("Logger writer cannot be nil")
+		w = ioutil.Discard
 	}
 
 	b := &baseLogger{
@@ -50,7 +54,7 @@ func InitBaseLogger(w io.Writer, prefix string) (*baseLogger, error) {
 		},
 	}
 
-	return b, nil
+	return b
 }
 
 func (s *baseLogger) Infof(fmt string, args ...interface{}) {
