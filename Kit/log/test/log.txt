@@ -1,2 +1,2 @@
-2017/08/16 22:45:11 INFO <logger> : Writing first String
-2017/08/16 22:45:11 INFO <changed> : Writing second String
+2017/08/26 22:52:22 INFO <logger> : Writing first String
+2017/08/26 22:52:22 INFO <changed> : Writing second String
